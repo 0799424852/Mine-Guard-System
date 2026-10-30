@@ -1,0 +1,16 @@
+apiVersion: 1
+
+datasources:
+  - name: MinerTimescaleDB
+    type: postgres
+    access: proxy
+    url: timescaledb:5432
+    database: minerdb
+    user: miner
+    secureJsonData:
+      password: minerpass
+    jsonData:
+      sslmode: disable
+      postgresVersion: 1600
+      timescaledb: true
+    isDefault: true

@@ -1,0 +1,105 @@
+{
+  "title": "Mine Safety Overview",
+  "uid": "mine-overview",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "5s",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Miners Online",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "datasource": { "type": "postgres", "uid": "MinerTimescaleDB" },
+      "targets": [
+        {
+          "rawSql": "SELECT COUNT(DISTINCT miner_id) AS value FROM telemetry",
+          "format": "table"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "WARN Alerts",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "datasource": { "type": "postgres", "uid": "MinerTimescaleDB" },
+      "targets": [
+        {
+          "rawSql": "SELECT COUNT(*) AS value FROM alerts WHERE level='WARN'",
+          "format": "table"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Open Evacuations",
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "datasource": { "type": "postgres", "uid": "MinerTimescaleDB" },
+      "targets": [
+        {
+          "rawSql": "SELECT COUNT(*) AS value FROM evacuations WHERE status='OPEN'",
+          "format": "table"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Last Reading Age (s)",
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "datasource": { "type": "postgres", "uid": "MinerTimescaleDB" },
+      "targets": [
+        {
+          "rawSql": "SELECT COALESCE(EXTRACT(EPOCH FROM now()) - MAX(ts), 0) AS value FROM telemetry",
+          "format": "table"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "CH4 (%LEL) per miner",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "datasource": { "type": "postgres", "uid": "MinerTimescaleDB" },
+      "targets": [
+        {
+          "rawSql": "SELECT to_timestamp(ts) AS time, ch4_lel AS value, miner_id AS metric FROM telemetry WHERE $__timeFilter(to_timestamp(ts)) ORDER BY ts",
+          "format": "time_series"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Heart Rate per miner",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "datasource": { "type": "postgres", "uid": "MinerTimescaleDB" },
+      "targets": [
+        {
+          "rawSql": "SELECT to_timestamp(ts) AS time, heart_rate AS value, miner_id AS metric FROM telemetry WHERE $__timeFilter(to_timestamp(ts)) ORDER BY ts",
+          "format": "time_series"
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "title": "Recent Alerts",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 12 },
+      "datasource": { "type": "postgres", "uid": "MinerTimescaleDB" },
+      "targets": [
+        {
+          "rawSql": "SELECT to_timestamp(ts) AS time, miner_id, zone, level, metric, value FROM alerts ORDER BY id DESC LIMIT 30",
+          "format": "table"
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "title": "Active Evacuations",
+      "gridPos": { "h": 6, "w": 24, "x": 0, "y": 20 },
+      "datasource": { "type": "postgres", "uid": "MinerTimescaleDB" },
+      "targets": [
+        {
+          "rawSql": "SELECT id, to_timestamp(ts) AS time, zone, reason, triggered_by, status FROM evacuations ORDER BY id DESC LIMIT 10",
+          "format": "table"
+        }
+      ]
+    }
+  ]
+}
